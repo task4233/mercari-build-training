@@ -94,3 +94,24 @@ $ curl -X GET 'http://127.0.0.1:9000/search?keyword=h'
 {"items":[{"name":"shoes","category":"unknown","image_name":"default.jpg"}]}
 ```
 
+## 3. Move the category information to a separated table
+
+> Modify the database as follows. That makes it possible to change the category names without modifying the all categories of items in the items table. Since GET items should return the category name as before, join these two tables when returning responses.
+
+**items table**
+
+| id   | name   | category_id | image_filename                                                       |
+| :--- | :----- | :---------- | :------------------------------------------------------------------- |
+| 1    | jacket | 1           | 510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg |
+| 2    | ...    |             |                                                                      |
+
+**category table**
+
+| id   | name    |
+| :--- | :------ |
+| 1    | fashion |
+| ...  |         |
+
+
+---
+
