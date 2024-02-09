@@ -118,6 +118,39 @@ func getImg(c echo.Context) error {
 	return c.File(imgPath)
 }
 
+func searchItem(c echo.Context) error {
+	// get keyword value from the query
+	keyword := c.QueryParam("keyword")
+
+	// get a connection to the SQLite3 database
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	defer db.Close()
+
+	// invoke SQL to enumerate items by filtering with the `keyword` value
+	rows, err := db.Query("SELECT name, category, image_name FROM items WHERE name LIKE ?", "%"+keyword+"%")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	defer rows.Close()
+
+	// map the items to returned variable
+	items := Items{Items: []*Item{}}
+	for rows.Next() {
+		var item Item
+		err := rows.Scan(&item.Name, &item.Category, &item.ImageFilename)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		items.Items = append(items.Items, &item)
+	}
+
+	// return them as JSON
+	return c.JSON(http.StatusOK, items)
+}
+
 func main() {
 	e := echo.New()
 
@@ -140,6 +173,7 @@ func main() {
 	e.GET("/items", getItems)
 	e.POST("/items", addItem)
 	e.GET("/image/:imageFilename", getImg)
+	e.GET("/search", searchItem)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":9000"))

@@ -83,3 +83,14 @@ $ curl -X GET 'http://127.0.0.1:9000/search?keyword=jacket'
   - enumerate items by filtering with the `keyword` value
   - return them to the client
 
+### Self-QA
+
+```bash
+$ curl -X GET 'http://127.0.0.1:9000/search?keyword=jacket'
+{"items":[{"name":"jacket","category":"fashion","image_name":"510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg"}]}
+$ curl -X GET 'http://127.0.0.1:9000/search?keyword='      
+{"items":[{"name":"jacket","category":"fashion","image_name":"510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg"},{"name":"shoes","category":"unknown","image_name":"default.jpg"}]}
+$ curl -X GET 'http://127.0.0.1:9000/search?keyword=h'
+{"items":[{"name":"shoes","category":"unknown","image_name":"default.jpg"}]}
+```
+
