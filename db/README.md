@@ -115,3 +115,92 @@ $ curl -X GET 'http://127.0.0.1:9000/search?keyword=h'
 
 ---
 
+- goal
+  - separate table
+- requirements
+  - create a new table `category`
+  - update the `items` table
+
+SQLite does not provide the feature to change the type of columns which has already defined. So, please let me defining from the beginning.
+
+```sql
+CREATE TABLE category (
+  id INT PRIMARY KEY,
+  name VARCHAR(255)
+);
+
+CREATE TABLE items (
+    id INT PRIMARY KEY,
+    name VARCHAR(255),
+    category_id int,
+    image_name VARCHAR(255),
+    foreign key (category_id) references category(id)
+);
+```
+
+Apply changes as follows.
+
+```bash
+$ # remove the existing DB
+$ rm db/mercari.sqlite3 
+$ # construct new definitions
+$ sqlite3 db/mercari.sqlte3
+sqlite> CREATE TABLE category (
+  id INT PRIMARY KEY,
+  name VARCHAR(255)
+);
+sqlite> .schema category
+CREATE TABLE category (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255)
+);
+sqlite> CREATE TABLE items (
+    id INT PRIMARY KEY,
+    name VARCHAR(255),
+    category_id int,
+    image_name VARCHAR(255),
+    foreign key (category_id) references category(id)
+);
+sqlite> .schema items
+CREATE TABLE items (
+    id INT PRIMARY KEY,
+    name VARCHAR(255),
+    category_id int,
+    image_name VARCHAR(255),
+    foreign key (category_id) references category(id)
+);
+```
+
+Add values represented in the example into DB as follows:
+
+```bash
+INSERT INTO category (id, name) VALUES (1, "fashion");
+INSERT INTO items (id, name, category_id, image_name) VALUES (1, "jacket", 1, "510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg");
+```
+
+Confirm the inserted value.
+
+```bash
+sqlite> SELECT * FROM items;
+1|jacket|1|510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg
+sqlite> SELECT * FROM category;
+1|fashion
+sqlite> SELECT i.id, i.name, c.name, i.image_name FROM items as i JOIN category as c ON i.category_id=c.id;
+1|jacket|fashion|510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg
+```
+
+---
+
+> What is database **normalization**?
+
+In summary, the database normalization is to divide large tables into smaller, more manageable tables and define relationships between them. The purpose is to reduce redundancy.
+
+By the way, what are "redundancy"?
+
+"High redundancy" means that data with the same meaning is stored scatterly. Let's say, for example, imagine a case of weight measurement. There're both weight(kg) and weight(g) are stored. This implies the same data, but in different units. Their data can be derived each other. Then, the condition is called "high redundancy".
+
+One of the pros is that by reducing redundancy, the risk of data inconsistencies is reduced. For example, in the previous example of weight, let's say the measurements were incorrect and required to be updated. Then, suppose you updated the information for weight(kg), but forgot to update in weight(g). This would cause inconsistencies in the information, and other people would not know which information was correct when they looked at them. The normalisation can help to avoid this issue.
+
+One of the cons is time consuming when collecting the data may increase because the information is distributed. An analogy would be like data being written in various notebooks; it is likely to be more difficult to find information from several notebooks together than from one notebook.
+
+Therefore, appropriate normalisation is needed to be implemented, taking into account the pros and cons.
