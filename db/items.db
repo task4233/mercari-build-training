@@ -1,0 +1,6 @@
+CREATE TABLE items (
+    id INT PRIMARY KEY,
+    name VARCHAR(255),
+    category VARCHAR(255),
+    image_name VARCHAR(255)
+);
