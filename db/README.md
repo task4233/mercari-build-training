@@ -62,3 +62,24 @@ $ curl localhost:9000/items
 - to manage structured data
 - to manage data safely with multiple people
 - to operate data declaratively
+
+## 2. Search for an item
+
+> Make an endpoint to return a list of items that include a specified keyword called GET /search.
+
+```bash
+# Request a list of items containing string "jacket"
+$ curl -X GET 'http://127.0.0.1:9000/search?keyword=jacket'
+# Expected response for a list of items with name containing "jacket"
+{"items": [{"name": "jacket", "category": "fashion"}, ...]}
+```
+
+---
+
+- goal
+  - search items by the `keyword` value given the query in URL
+- requirements
+  - get `keyword` value from the query
+  - enumerate items by filtering with the `keyword` value
+  - return them to the client
+
