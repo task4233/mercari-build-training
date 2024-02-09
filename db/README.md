@@ -54,3 +54,11 @@ $ curl -X POST -F "name=shoes" http://localhost:9000/items
 $ curl localhost:9000/items
 {"items":[{"name":"jacket","category":"fashion","image_name":"510824dfd4caed183a7a7cc2be80f24a5f5048e15b3b5338556d5bbd3f7bc267.jpg"},{"name":"shoes","category":"unknown","image_name":"default.jpg"}]}
 ```
+
+---
+
+> What are the advantages of saving into a database such as SQLite instead of saving into a single JSON file?
+
+- to manage structured data
+- to manage data safely with multiple people
+- to operate data declaratively
