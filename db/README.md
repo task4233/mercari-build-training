@@ -1,11 +1,12 @@
 # Database(DB)
+## Database
 What is "Database"?
 
-According to the article by Oracle, "Database" is explained as follows:
+According to [the article of Oracle](https://www.oracle.com/database/what-is-database/), "Database" is explained as follows:
 
 > A database is an organized collection of structured information, or data, typically stored electronically in a computer system. A database is usually controlled by a database management system (DBMS). Together, the data and the DBMS, along with the applications that are associated with them, are referred to as a database system, often shortened to just database.
 
-> Data within the most common types of databases in operation today is typically modeled in rows and columns in a series of tables to make processing and data querying efficient. The data can then be easily accessed, managed, modified, updated, controlled, and organized. Most databases use structured query language (SQL) for writing and querying data.
+![table.png](table.png)
 
 There are various types of DBs such as MySQL, PostgreSQL, SQLite, Oracle Database, Spanner, SpiceDB and etc... They have different features and different use cases in each. Their details are omitted because it is too much information to explain them enough time. I think best way to learn "Database" is to try to design and use like "Nothing beats experience". but for someone who is interested in databases, please let me share some recommendation from me :+1:
 
@@ -17,9 +18,19 @@ ref:
 - [[Theory] Foundations of Databases](http://webdam.inria.fr/Alice/)
   - This book provides detailed information on database fundamentals and theory.
 
+## SQL(Structured Query Language)
+According to [the same article](https://www.oracle.com/database/what-is-database/) mentioned above, 
+
+> SQL is a programming language used by nearly all relational databases to query, manipulate, and define data, and to provide access control. 
+
+![sql.png](sql.png)
+
+![db.png](db.png)
+
 ## 1. Write into a database
 
 ```sql
+-- db/items.db
 CREATE TABLE items (
     id INT PRIMARY KEY,
     name VARCHAR(255),
@@ -77,7 +88,7 @@ $ curl localhost:9000/items
 
 > What are the advantages of saving into a database such as SQLite instead of saving into a single JSON file?
 
-- to manage structured data
+- to manage structured data including binary
 - to manage data safely with multiple people
 - to operate data declaratively
 
@@ -215,7 +226,7 @@ In summary, the database normalization is to divide large tables into smaller, m
 
 By the way, what are "redundancy"?
 
-"High redundancy" means that data with the same meaning is stored scatterly. Let's say, for example, imagine a case of weight measurement. There're both weight(kg) and weight(g) are stored. This implies the same data, but in different units. Their data can be derived each other. Then, the condition is called "high redundancy".
+"High redundancy" means that data with the same meaning is stored scatterly; in short, data duplication. Let's say, for example, imagine a case of weight measurement. There're both weight(kg) and weight(g) are stored. This implies the same data, but in different units. Their data can be derived each other. Then, the condition is called "high redundancy".
 
 One of the pros is that by reducing redundancy, the risk of data inconsistencies is reduced. For example, in the previous example of weight, let's say the measurements were incorrect and required to be updated. Then, suppose you updated the information for weight(kg), but forgot to update in weight(g). This would cause inconsistencies in the information, and other people would not know which information was correct when they looked at them. The normalisation can help to avoid this issue.
 
