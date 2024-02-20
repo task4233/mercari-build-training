@@ -1,0 +1,12 @@
+CREATE TABLE category (
+  id INT PRIMARY KEY,
+  name VARCHAR(255)
+);
+
+CREATE TABLE items (
+    id INT PRIMARY KEY,
+    name VARCHAR(255),
+    category_id int,
+    image_name VARCHAR(255),
+    foreign key (category_id) references category(id)
+);
