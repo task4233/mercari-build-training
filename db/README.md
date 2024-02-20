@@ -1,4 +1,22 @@
-# Database
+# Database(DB)
+What is "Database"?
+
+According to the article by Oracle, "Database" is explained as follows:
+
+> A database is an organized collection of structured information, or data, typically stored electronically in a computer system. A database is usually controlled by a database management system (DBMS). Together, the data and the DBMS, along with the applications that are associated with them, are referred to as a database system, often shortened to just database.
+
+> Data within the most common types of databases in operation today is typically modeled in rows and columns in a series of tables to make processing and data querying efficient. The data can then be easily accessed, managed, modified, updated, controlled, and organized. Most databases use structured query language (SQL) for writing and querying data.
+
+There are various types of DBs such as MySQL, PostgreSQL, SQLite, Oracle Database, Spanner, SpiceDB and etc... They have different features and different use cases in each. Their details are omitted because it is too much information to explain them enough time. I think best way to learn "Database" is to try to design and use like "Nothing beats experience". but for someone who is interested in databases, please let me share some recommendation from me :+1:
+
+ref:
+- [[Performance] SQL Antipatterns](https://www.oreilly.com/library/view/sql-antipatterns/9781680500073/)
+  - This book introduces some anti-pattern to make our SQL which is the langueage to handle DB slow and the way to resolve them.
+- [[Mechanism] Database Internals](https://www.oreilly.com/library/view/database-internals/9781492040330/)
+  - This book provides information about internal mechanisms of DBMS and distributed systems.
+- [[Theory] Foundations of Databases](http://webdam.inria.fr/Alice/)
+  - This book provides detailed information on database fundamentals and theory.
+
 ## 1. Write into a database
 
 ```sql
