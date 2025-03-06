@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -47,6 +48,7 @@ func (s Server) Run() int {
 	mux.HandleFunc("GET /", h.Hello)
 	mux.HandleFunc("GET /items", h.GetItems)
 	mux.HandleFunc("POST /items", h.AddItem)
+	mux.HandleFunc("GET /items/{id}", h.GetItem)
 	mux.HandleFunc("GET /images/{filename}", h.GetImage)
 
 	// start the server
@@ -211,6 +213,59 @@ func (s *Handlers) storeImage(image []byte) (filePath string, err error) {
 	}
 
 	return filePath, nil
+}
+
+type GetItemRequest struct {
+	ID int // converted from path value
+}
+
+// parseGetItemRequest parses and validates the request to get an item.
+func parseGetItemRequest(r *http.Request) (*GetItemRequest, error) {
+	id := r.PathValue("id")
+
+	// validate the request
+	n, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, fmt.Errorf("id should be a number: %w", err)
+	}
+	if n < 0 {
+		return nil, errors.New("id should be a positive number")
+	}
+
+	req := &GetItemRequest{
+		ID: n, // from path parameter
+	}
+
+	return req, nil
+}
+
+type GetItemResponse struct {
+	Item *Item `json:"item"`
+}
+
+func (s *Handlers) GetItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	req, err := parseGetItemRequest(r)
+	if err != nil {
+		slog.Warn("failed to parse get item request: ", "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	item, err := s.itemRepo.Get(ctx, req.ID)
+	if err != nil {
+		slog.Error("failed to get item", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(item)
+	if err != nil {
+		slog.Error("failed to encode", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 type GetImageRequest struct {
