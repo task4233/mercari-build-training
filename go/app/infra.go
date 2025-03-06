@@ -91,7 +91,7 @@ func (i *itemRepository) GetAll(ctx context.Context) (*Items, error) {
 func StoreImage(filePath string, image []byte) error {
 	err := os.WriteFile(filePath, image, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to store image: %w", err)
+		return fmt.Errorf("failed to store image2: %w", err)
 	}
 
 	return nil

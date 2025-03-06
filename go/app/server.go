@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -92,16 +93,16 @@ type AddItemResponse struct {
 // parseAddItemRequest parses and validates the request to add an item.
 func parseAddItemRequest(r *http.Request) (*AddItemRequest, error) {
 	name, category := r.FormValue("name"), r.FormValue("category")
-	// f, _, err := r.FormFile("image")
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to get image value: %w", err)
-	// }
-	// defer f.Close()
+	f, _, err := r.FormFile("image")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get image value: %w", err)
+	}
+	defer f.Close()
 
-	// image, err := io.ReadAll(f)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to read image file info: %w", err)
-	// }
+	image, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read image file info: %w", err)
+	}
 
 	// validate the request
 	if name == "" {
@@ -110,9 +111,9 @@ func parseAddItemRequest(r *http.Request) (*AddItemRequest, error) {
 	if category == "" {
 		return nil, errors.New("category is required")
 	}
-	// if len(image) == 0 {
-	// 	return nil, errors.New("image is required")
-	// }
+	if len(image) == 0 {
+		return nil, errors.New("image is required")
+	}
 
 	return &AddItemRequest{
 		Name:     name,
@@ -154,22 +155,21 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fileName, err := s.storeImage(req.Image)
-	// if err != nil {
-	// 	slog.Error("failed to store image: ", "error", err)
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
+	fileName, err := s.storeImage(req.Image)
+	if err != nil {
+		slog.Error("failed to store image: ", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	item := &Item{
-		Name:     req.Name,
-		Category: req.Category,
-		// ImageName: fileName,
+		Name:      req.Name,
+		Category:  req.Category,
+		ImageName: fileName,
 	}
 	message := fmt.Sprintf("item received: name: %s, category: %s, image_name: %s", item.Name, item.Category, item.ImageName)
 	slog.Info(message)
 
-	// STEP 4-2: add an implementation to store an image
 	err = s.itemRepo.Insert(ctx, item)
 	if err != nil {
 		slog.Error("failed to store item: ", "error", err)
@@ -190,7 +190,7 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 // and stores it in the image directory.
 func (s *Handlers) storeImage(image []byte) (filePath string, err error) {
 	hash := sha256.Sum256(image)
-	filePath, err = s.buildImagePath(hex.EncodeToString(hash[:]))
+	filePath, err = s.buildImagePath(hex.EncodeToString(hash[:]) + ".jpg")
 	if err != nil {
 		return "", err
 	}
@@ -243,7 +243,15 @@ func (s *Handlers) GetImage(w http.ResponseWriter, r *http.Request) {
 
 	imgPath, err := s.buildImagePath(req.FileName)
 	if err != nil {
-		if !errors.Is(err, errImageNotFound) {
+		slog.Warn("failed to build image path: ", "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// check if the image exists
+	_, err = os.Stat(imgPath)
+	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
 			slog.Warn("failed to build image path: ", "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -271,12 +279,6 @@ func (s *Handlers) buildImagePath(imageFileName string) (string, error) {
 	// validate the image suffix
 	if !strings.HasSuffix(imgPath, ".jpg") && !strings.HasSuffix(imgPath, ".jpeg") {
 		return "", fmt.Errorf("image path does not end with .jpg or .jpeg: %s", imgPath)
-	}
-
-	// check if the image exists
-	_, err = os.Stat(imgPath)
-	if err != nil {
-		return imgPath, errImageNotFound
 	}
 
 	return imgPath, nil
