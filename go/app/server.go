@@ -44,6 +44,7 @@ func (s Server) Run() int {
 	// set up routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", h.Hello)
+	mux.HandleFunc("GET /items", h.GetItems)
 	mux.HandleFunc("POST /items", h.AddItem)
 	mux.HandleFunc("GET /images/{filename}", h.GetImage)
 
@@ -118,6 +119,29 @@ func parseAddItemRequest(r *http.Request) (*AddItemRequest, error) {
 		Category: category,
 		// Image:    image,
 	}, nil
+}
+
+type GetItemsResponse struct {
+	Items []*Item `json:"items"`
+}
+
+// GetItems is a handler to fetch all items for GET /items.
+func (s *Handlers) GetItems(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	items, err := s.itemRepo.GetAll(ctx)
+	if err != nil {
+		slog.Error("failed to get items", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(items)
+	if err != nil {
+		slog.Error("failed to encode", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // AddItem is a handler to add a new item for POST /items .
